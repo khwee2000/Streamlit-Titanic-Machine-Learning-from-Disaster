@@ -2,9 +2,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
+#function to read dataset from csv file 
+@st.cache
+def read_data():
+    df = pd.read_csv("train.csv")
+    return df
 
+#taking input from function
+df = read_data()
 # 데이터셋 로드
-df = pd.read_csv("train.csv")
 
 # 대시보드 제목
 st.title("Titanic 생존률 대시보드")
