@@ -7,7 +7,7 @@ st.set_page_config(page_title="Titanic Dashboard",page_icon="🚢",
 layout="wide")
 
 # 파일 로드
-df = pd.read_csv('./train.csv')
+df = pd.read_csv('train.csv')
 
 # 데이터셋 확인
 st.write(df)
