@@ -4,7 +4,7 @@ import seaborn as sns
 import streamlit as st
 
 # 데이터셋 로드
-df = pd.read_csv("titanic.csv")
+df = pd.read_csv("train.csv")
 
 # 대시보드 제목
 st.title("Titanic 생존률 대시보드")
