@@ -6,20 +6,8 @@ import streamlit as st
 st.set_page_config(page_title="Titanic Dashboard",page_icon="🚢",
 layout="wide")
 
-#function to read dataset from csv file 
-import requests
-from io import StringIO
-
-# GitHub Raw URL
-url = 'https://raw.githubusercontent.com/khwe2000/streamlit-titanic-machine-learning-from-disaster/stremlit/train.csv'
-
-# 파일 다운로드 및 저장
-response = requests.get(url)
-with open('/app/streamlit-titanic-machine-learning-from-disaster/streamlit/train.csv', 'wb') as f:
-    f.write(response.content)
-
 # 파일 로드
-df = pd.read_csv('/app/streamlit-titanic-machine-learning-from-disaster/python/train.csv')
+df = pd.read_csv('train.csv')
 
 # 데이터셋 확인
 st.write(df)
