@@ -1,57 +1,50 @@
-""" streamlit_app.py """
-
-import pandas as pd
 import streamlit as st
-from sidebar_value import Sidebar_value
-from data_get import Data_Get
-from preprocessing import Preprocessing
-from create_train_test import Create_Train_Test
-from basic_ml import Trial_ML
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-st.title('Titanic - Machine Learning from Disaster')
+# 타이타닉 데이터를 불러옵니다.
+data = pd.read_csv('train.csv')
 
-st.sidebar.subheader('Parameter')
-bins = Sidebar_value().bins_value()
-solution = Sidebar_value().solution_value()
-test_size = Sidebar_value().test_size_value()
-file_output = Sidebar_value().file_output_value()
-output_name = Sidebar_value().file_output_name()
-analysis = Sidebar_value().analysis_value()
+# 타이틀을 설정합니다.
+st.title('타이타닉 데이터 시각화 대시보드')
 
+# 데이터프레임을 출력합니다.
+st.subheader('데이터 개요')
+st.write(data)
 
-st.subheader('(1) Data Structure')
-alldata, test_raw = Data_Get().read_data()
+# 생존자와 사망자의 수를 계산합니다.
+survived = data['Survived'].value_counts()
+survived_df = pd.DataFrame({'Survived': survived.index, 'Passenger Count': survived.values})
 
+# 막대 그래프로 생존자와 사망자를 시각화합니다.
+st.subheader('생존자 vs 사망자')
+st.bar_chart(survived_df['Passenger Count'])
 
-st.subheader('(2) Missing Value')
-st.write('Please coding your method for missing value')
-alldata = Data_Get().missing_value(alldata)
+# 객실 등급별 생존율을 계산합니다.
+pclass_survived = data.groupby('Pclass')['Survived'].mean().reset_index()
+pclass_survived.columns = ['Pclass', 'Survival Rate']
 
+# 막대 그래프로 객실 등급별 생존율을 시각화합니다.
+st.subheader('객실 등급별 생존율')
+st.bar_chart(pclass_survived['Survival Rate'])
 
-st.subheader('(3) Preprocessing')
-st.write('Please coding your method for preprocessing')
-alldata_sum = alldata.copy()
+# 성별에 따른 생존자와 사망자의 수를 계산합니다.
+sex_survived = data.groupby('Sex')['Survived'].value_counts().unstack().reset_index()
+sex_survived.columns = ['Sex', 'Did Not Survive', 'Survived']
+sex_survived = sex_survived.melt(id_vars='Sex', var_name='Survival Status', value_name='Passenger Count')
 
-alldata_sum = Preprocessing().name_process(alldata_sum)
-alldata_sum = Preprocessing().fare_processing(alldata_sum, bins)
-alldata_sum = Preprocessing().age_processing(alldata_sum, solution)
-alldata_sum = Preprocessing().family_processing(alldata_sum)
-alldata_sum = Preprocessing().cabin_processing(alldata_sum)
-alldata_sum = Preprocessing().ticket_processing(alldata_sum)
+# 막대 그래프로 성별에 따른 생존자와 사망자를 시각화합니다.
+st.subheader('성별에 따른 생존자 vs 사망자')
+sns.barplot(x='Sex', y='Passenger Count', hue='Survival Status', data=sex_survived)
+plt.xlabel('Sex')
+plt.ylabel('Passenger Count')
+plt.legend(title='Survival Status')
+st.pyplot()
 
-
-st.subheader('(4) Create Train data')
-alldata_sum = Create_Train_Test().label_encoder(alldata_sum)
-alldata_sum = Create_Train_Test().dummy_df(alldata_sum)
-train_feature, train_tagert, test_feature = Create_Train_Test().create_train_test(alldata_sum)
-
-if test_raw.shape[0] != test_feature.shape[0]:
-    st.warning("Bad status of test_feature.Please check your preprocessing")
-X_train, X_test, y_train, y_test = Create_Train_Test().split_train_test(train_feature, train_tagert, test_size)
-
-if analysis:
-    st.subheader('(5) Machine Learning(Basic)')
-    rfc, xgb, lgb, lr, svc = Trial_ML().base_ml(X_train, X_test, y_train, y_test)
-
-    if file_output == 'Yes':
-        Trial_ML().output_file(output_name, rfc, xgb, lgb, lr, svc)
+# 나이 분포를 시각화합니다.
+st.subheader('나이 분포')
+st.hist(data['Age'].dropna(), bins=20, edgecolor='k')
+plt.xlabel('Age')
+plt.ylabel('Count')
+st.pyplot()
