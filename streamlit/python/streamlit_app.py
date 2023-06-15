@@ -1,50 +1,74 @@
-import streamlit as st
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
+import streamlit as st
 
-# 타이타닉 데이터를 불러옵니다.
-data = pd.read_csv('train.csv')
+# 데이터셋 로드
+df = pd.read_csv("titanic.csv")
 
-# 타이틀을 설정합니다.
-st.title('타이타닉 데이터 시각화 대시보드')
+# 대시보드 제목
+st.title("Titanic 생존률 대시보드")
 
-# 데이터프레임을 출력합니다.
-st.subheader('데이터 개요')
-st.write(data)
+# 생존자와 사망자 수 시각화
+survived = df["Survived"].value_counts()
 
-# 생존자와 사망자의 수를 계산합니다.
-survived = data['Survived'].value_counts()
-survived_df = pd.DataFrame({'Survived': survived.index, 'Passenger Count': survived.values})
+# 레이아웃 설정
+col1, col2 = st.columns(2)
 
-# 막대 그래프로 생존자와 사망자를 시각화합니다.
-st.subheader('생존자 vs 사망자')
-st.bar_chart(survived_df['Passenger Count'])
+# col1에 생존자와 사망자 수 차트 추가
+with col1:
+    st.subheader("생존자와 사망자 수")
+    st.bar_chart(survived)
 
-# 객실 등급별 생존율을 계산합니다.
-pclass_survived = data.groupby('Pclass')['Survived'].mean().reset_index()
-pclass_survived.columns = ['Pclass', 'Survival Rate']
+# 성별 생존율 시각화
+gender_survival = df.groupby("Sex")["Survived"].mean()
 
-# 막대 그래프로 객실 등급별 생존율을 시각화합니다.
-st.subheader('객실 등급별 생존율')
-st.bar_chart(pclass_survived['Survival Rate'])
+# col2에 성별 생존율 차트 추가
+with col2:
+    st.subheader("성별 생존율")
+    st.bar_chart(gender_survival)
 
-# 성별에 따른 생존자와 사망자의 수를 계산합니다.
-sex_survived = data.groupby('Sex')['Survived'].value_counts().unstack().reset_index()
-sex_survived.columns = ['Sex', 'Did Not Survive', 'Survived']
-sex_survived = sex_survived.melt(id_vars='Sex', var_name='Survival Status', value_name='Passenger Count')
+# 객실 등급에 따른 생존율 시각화
+class_survival = df.groupby("Pclass")["Survived"].mean()
 
-# 막대 그래프로 성별에 따른 생존자와 사망자를 시각화합니다.
-st.subheader('성별에 따른 생존자 vs 사망자')
-sns.barplot(x='Sex', y='Passenger Count', hue='Survival Status', data=sex_survived)
-plt.xlabel('Sex')
-plt.ylabel('Passenger Count')
-plt.legend(title='Survival Status')
+# 레이아웃 설정
+col3, col4 = st.columns(2)
+
+# col3에 객실 등급에 따른 생존율 차트 추가
+with col3:
+    st.subheader("객실 등급에 따른 생존율")
+    st.bar_chart(class_survival)
+
+# 나이별 생존율 시각화
+# 결측치 처리
+df["Age"].fillna(df["Age"].mean(), inplace=True)
+# 나이 구간 생성
+age_bins = [0, 18, 30, 50, 80]
+age_labels = ["0-18", "18-30", "30-50", "50+"]
+df["AgeGroup"] = pd.cut(df["Age"], bins=age_bins, labels=age_labels)
+age_survival = df.groupby("AgeGroup")["Survived"].mean()
+
+# col4에 나이별 생존율 차트 추가
+with col4:
+    st.subheader("나이별 생존율")
+    st.bar_chart(age_survival)
+
+# 승선 항구에 따른 생존율 시각화
+embark_survival = df.groupby("Embarked")["Survived"].mean()
+
+# 레이아웃 설정
+col5, col6 = st.columns(2)
+
+# col5에 승선 항구에 따른 생존율 차트 추가
+with col5:
+    st.subheader("승선 항구에 따른 생존율")
+    st.bar_chart(embark_survival)
+
+# Fare 분포 시각화
+st.subheader("Fare 분포")
+sns.histplot(data=df, x="Fare", kde=True)
 st.pyplot()
 
-# 나이 분포를 시각화합니다.
-st.subheader('나이 분포')
-st.hist(data['Age'].dropna(), bins=20, edgecolor='k')
-plt.xlabel('Age')
-plt.ylabel('Count')
-st.pyplot()
+# 대시보드 실행
+if __name__ == "__main__":
+    st.set_option('deprecation.showPyplotGlobalUse', False)
