@@ -7,7 +7,10 @@ st.set_page_config(page_title="Titanic Dashboard",page_icon="🚢",
 layout="wide")
 
 # 파일 로드
-df = pd.read_csv('train.csv')
+csv_url = 'https://raw.githubusercontent.com/khwee2000/Streamlit-Titanic-Machine-Learning-from-Disaster/main/streamlit/train.csv'
+
+# train.csv 파일 로드
+df = pd.read_csv(csv_url)
 
 # 데이터셋 확인
 st.write(df)
